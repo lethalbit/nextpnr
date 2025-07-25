@@ -19,7 +19,12 @@
 
 #include "pythontab.h"
 #include <QGridLayout>
+#if PYTHON_API_NG
+#include <Python.h>
+#include "pybindings_ng.h"
+#else
 #include "pybindings.h"
+#endif
 #include "pyinterpreter.h"
 
 NEXTPNR_NAMESPACE_BEGIN
@@ -69,7 +74,11 @@ PythonTab::~PythonTab()
 {
     if (initialized) {
         pyinterpreter_finalize();
+#if PYTHON_API_NG
+        python::teardown();
+#else
         deinit_python();
+#endif
     }
 }
 
@@ -91,15 +100,26 @@ void PythonTab::newContext(Context *ctx)
 {
     if (initialized) {
         pyinterpreter_finalize();
+#if PYTHON_API_NG
+        python::teardown();
+#else
         deinit_python();
+#endif
     }
     console->clear();
 
     pyinterpreter_preinit();
+#if PYTHON_API_NG
+#else
     init_python("nextpnr");
+#endif
     pyinterpreter_initialize();
     pyinterpreter_aquire();
+#if PYTHON_API_NG
+    python::inject_global("ctx", ctx);
+#else
     python_export_global("ctx", ctx);
+#endif
     pyinterpreter_release();
 
     initialized = true;

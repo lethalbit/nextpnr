@@ -23,7 +23,11 @@
 #include "mainwindow.h"
 #endif
 #ifndef NO_PYTHON
+#if PYTHON_API_NG
+#include "pybindings_ng.h"
+#else
 #include "pybindings.h"
+#endif
 #endif
 
 #include <boost/algorithm/string.hpp>
@@ -643,14 +647,23 @@ int CommandHandler::executeMain(std::unique_ptr<Context> ctx)
     }
 
 #ifndef NO_PYTHON
+#if PYTHON_API_NG
+    python::initialize();
+    python::inject_global("ctx", *ctx);
+#else
     init_python(argv[0]);
     python_export_global("ctx", *ctx);
-
+#endif
     if (vm.count("run")) {
 
         std::vector<std::string> files = vm["run"].as<std::vector<std::string>>();
-        for (auto filename : files)
+        for (auto& filename : files) {
+#if PYTHON_API_NG
+            python::exec_file(filename);
+#else
             execute_python_file(filename.c_str());
+#endif
+        }
     } else
 #endif
             if (ctx->design_loaded) {
@@ -719,7 +732,11 @@ int CommandHandler::executeMain(std::unique_ptr<Context> ctx)
     }
 
 #ifndef NO_PYTHON
+#if PYTHON_API_NG
+    python::teardown();
+#else
     deinit_python();
+#endif
 #endif
 
     return had_nonfatal_error ? 1 : 0;
@@ -785,8 +802,13 @@ void CommandHandler::run_script_hook(const std::string &name)
 #ifndef NO_PYTHON
     if (vm.count(name)) {
         std::vector<std::string> files = vm[name].as<std::vector<std::string>>();
-        for (auto filename : files)
+        for (auto& filename : files) {
+#if PYTHON_API_NG
+            python::exec_file(filename);
+#else
             execute_python_file(filename.c_str());
+#endif
+        }
     }
 #endif
 }
