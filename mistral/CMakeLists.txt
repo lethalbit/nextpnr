@@ -3,8 +3,6 @@ set(SOURCES
     archdefs.cc
     archdefs.h
     arch.h
-    arch_pybindings.cc
-    arch_pybindings.h
     bitstream.cc
     constids.inc
     delay.cc
@@ -17,8 +15,19 @@ set(SOURCES
     qsf.cc
 )
 
+if (PYTHON_API_NG)
+    set(PY_SOURCES
+        arch_pybindingsng.cc
+    )
+else()
+    set(PY_SOURCES
+        arch_pybindings.cc
+        arch_pybindings.h
+    )
+endif()
+
 add_nextpnr_architecture(${family}
-    CORE_SOURCES ${SOURCES}
+    CORE_SOURCES ${SOURCES} ${PY_SOURCES}
     MAIN_SOURCE  main.cc
 )
 

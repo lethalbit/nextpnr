@@ -7,8 +7,6 @@ set(SOURCES
     archdefs.h
     arch.h
     arch_place.cc
-    arch_pybindings.cc
-    arch_pybindings.h
     bba_version.inc
     constids.inc
     fasm.cc
@@ -20,8 +18,19 @@ set(SOURCES
     post_place.cc
 )
 
+if (PYTHON_API_NG)
+    set(PY_SOURCES
+        arch_pybindingsng.cc
+    )
+else()
+    set(PY_SOURCES
+        arch_pybindings.cc
+        arch_pybindings.h
+    )
+endif()
+
 add_nextpnr_architecture(${family}
-    CORE_SOURCES ${SOURCES}
+    CORE_SOURCES ${SOURCES} ${PY_SOURCES}
     MAIN_SOURCE  main.cc
 )
 

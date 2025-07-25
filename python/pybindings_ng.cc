@@ -95,6 +95,8 @@ namespace python {
 		py::exec(code, scope);
 	}
 
+	void initialize_arch_api(py::module_& module, py::class_<Context>& ctx);
+
 	void dump_traceback(const py::error_already_set& exception) {
 		const auto type{exception.type()};
 		const auto value{exception.value()};
@@ -554,7 +556,7 @@ PYBIND11_EMBEDDED_MODULE(nextpnr, m) {
 
 	/* ==== <ARCH> submodule ==== */
 	auto m_arch = m.def_submodule(STRINGIFY(ARCHNAME), "Python API for " STRINGIFY(ARCHNAME));
-	python::initialize_arch_api(m_arch);
+	python::initialize_arch_api(m_arch, context);
 }
 
 NEXTPNR_NAMESPACE_END

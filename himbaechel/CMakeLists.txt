@@ -4,8 +4,6 @@ set(HIMBAECHEL_SOURCES
     arch.cc
     archdefs.h
     arch.h
-    arch_pybindings.cc
-    arch_pybindings.h
     chipdb.h
     himbaechel_api.cc
     himbaechel_api.h
@@ -14,6 +12,17 @@ set(HIMBAECHEL_SOURCES
     himbaechel_helpers.cc
     himbaechel_helpers.h
 )
+
+if (PYTHON_API_NG)
+    set(PY_SOURCES
+        arch_pybindingsng.cc
+    )
+else()
+    set(PY_SOURCES
+        arch_pybindings.cc
+        arch_pybindings.h
+    )
+endif()
 
 if (HIMBAECHEL_SPLIT)
 
@@ -24,7 +33,7 @@ if (HIMBAECHEL_SPLIT)
         list(TRANSFORM arg_TEST_SOURCES PREPEND ${CMAKE_CURRENT_SOURCE_DIR}/)
 
         add_nextpnr_architecture(himbaechel-${microtarget}
-            CORE_SOURCES ${HIMBAECHEL_SOURCES}
+            CORE_SOURCES ${HIMBAECHEL_SOURCES} ${PY_SOURCES}
             MAIN_SOURCE  main.cc
             CURRENT_SOURCE_DIR ${CMAKE_SOURCE_DIR}/himbaechel
             CURRENT_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}
@@ -40,7 +49,7 @@ if (HIMBAECHEL_SPLIT)
 else()
 
     add_nextpnr_architecture(himbaechel
-        CORE_SOURCES ${HIMBAECHEL_SOURCES}
+        CORE_SOURCES ${HIMBAECHEL_SOURCES} ${PY_SOURCES}
         MAIN_SOURCE  main.cc
     )
 
