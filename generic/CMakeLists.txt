@@ -2,8 +2,6 @@ set(SOURCES
     arch.cc
     archdefs.h
     arch.h
-    arch_pybindings.cc
-    arch_pybindings.h
     cells.cc
     cells.h
     pack.cc
@@ -29,8 +27,19 @@ set(SOURCES
     viaduct/okami/okami.cc
 )
 
+if (PYTHON_API_NG)
+    set(PY_SOURCES
+        arch_pybindingsng.cc
+    )
+else()
+    set(PY_SOURCES
+        arch_pybindings.cc
+        arch_pybindings.h
+    )
+endif()
+
 add_nextpnr_architecture(${family}
-    CORE_SOURCES ${SOURCES}
+    CORE_SOURCES ${SOURCES} ${PY_SOURCES}
     MAIN_SOURCE  main.cc
 )
 
