@@ -5,7 +5,6 @@ target_include_directories(nextpnr_kernel INTERFACE .)
 target_sources(nextpnr_kernel PUBLIC
     arch_api.h
     archcheck.cc
-    arch_pybindings_shared.h
     array2d.h
     base_arch.h
     base_clusterinfo.h
@@ -28,7 +27,6 @@ target_sources(nextpnr_kernel PUBLIC
     embed.h
     exclusive_state_groups.h
     exclusive_state_groups.impl.h
-    handle_error.cc
     hashlib.h
     idstring.cc
     idstring.h
@@ -48,10 +46,6 @@ target_sources(nextpnr_kernel PUBLIC
     nextpnr_types.h
     property.cc
     property.h
-    pybindings.cc
-    pybindings.h
-    pycontainers.h
-    pywrappers.h
     relptr.h
     report.cc
     scope_lock.h
@@ -67,6 +61,17 @@ target_sources(nextpnr_kernel PUBLIC
     util.h
 )
 
+if (NOT PYTHON_API_NG)
+    target_sources(nextpnr_kernel PUBLIC
+        arch_pybindings_shared.h
+        handle_error.cc
+        pybindings.cc
+        pybindings.h
+        pycontainers.h
+        pywrappers.h
+    )
+endif()
+
 target_link_libraries(nextpnr_kernel INTERFACE
     nextpnr_version
     nextpnr_frontend
@@ -75,12 +80,8 @@ target_link_libraries(nextpnr_kernel INTERFACE
     json11
 )
 
-if (BUILD_PYTHON)
-    target_include_directories(nextpnr_kernel INTERFACE
-        ${Python3_INCLUDE_DIRS}
-    )
-
+if (PYTHON_API_NG)
     target_link_libraries(nextpnr_kernel INTERFACE
-        pybind11::headers
+        nextpnr_python
     )
 endif()

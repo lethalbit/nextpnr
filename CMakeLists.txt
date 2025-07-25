@@ -9,6 +9,7 @@ set(CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
 
 include(CheckCXXCompilerFlag)
 include(CheckCXXCompilerHashEmbed)
+include(CMakeDependentOption)
 
 if (NOT DEFINED CMAKE_SUPPRESS_DEVELOPER_WARNINGS)
     set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE INTERNAL "No dev warnings")
@@ -32,6 +33,8 @@ option(EXTERNAL_CHIPDB "Create build with pre-built chipdb binaries" OFF)
 option(WERROR "pass -Werror to compiler (used for CI)" OFF)
 option(PROFILER "Link against libprofiler" OFF)
 option(USE_IPO "Compile nextpnr with IPO" ON)
+
+cmake_dependent_option(PYTHON_API_NG "Next-generation nextpnr Python API" OFF "BUILD_PYTHON" ON)
 
 set(PROGRAM_PREFIX "" CACHE STRING "Name prefix for executables")
 
@@ -184,6 +187,10 @@ if (BUILD_PYTHON)
         add_subdirectory(3rdparty/pybind11 EXCLUDE_FROM_ALL)
     endif()
     include_directories(${Python3_INCLUDE_DIRS})
+
+    if (PYTHON_API_NG)
+        add_definitions("-DPYTHON_API_NG")
+    endif()
 else()
     find_package(Python3 3.5 REQUIRED COMPONENTS Interpreter)
     add_definitions("-DNO_PYTHON")
@@ -240,6 +247,10 @@ add_subdirectory(frontend)
 add_subdirectory(json)
 add_subdirectory(rust)
 
+if (PYTHON_API_NG)
+    add_subdirectory(python)
+endif()
+
 if (BUILD_TESTS)
     add_subdirectory(tests/gui)
 endif()
@@ -271,6 +282,12 @@ function(add_nextpnr_architecture target)
         ${arg_CURRENT_SOURCE_DIR}
     )
 
+    if (PYTHON_API_NG)
+        target_include_directories(nextpnr-${target}-defs INTERFACE
+            ${CMAKE_SOURCE_DIR}/python
+        )
+    endif()
+
     string(TOUPPER ${family} family_upper)
     target_compile_definitions(nextpnr-${target}-defs INTERFACE
         NEXTPNR_NAMESPACE=nextpnr_${family}
@@ -294,6 +311,12 @@ function(add_nextpnr_architecture target)
         nextpnr_frontend
         nextpnr_json
     )
+
+    if (PYTHON_API_NG)
+        target_link_libraries(nextpnr-${target}-core INTERFACE
+            nextpnr_python
+        )
+    endif()
 
     target_link_libraries(nextpnr-${target}-core INTERFACE
         Boost::headers
