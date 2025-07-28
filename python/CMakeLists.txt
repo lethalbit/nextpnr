@@ -19,4 +19,7 @@ if (BUILD_PYTHON)
 	target_link_libraries(nextpnr_python INTERFACE
 		pybind11::headers
 	)
+
+	set(NEXTPNR_PYTHON_LIBS "${NEXTPNR_DATA_DIR}/python")
+
 endif()
