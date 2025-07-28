@@ -42,3 +42,5 @@ install_manifest.txt
 *.phys
 *.dcp
 *.bit
+*.pyc
+__pycache__/
