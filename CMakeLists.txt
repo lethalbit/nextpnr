@@ -15,6 +15,20 @@ if (NOT DEFINED CMAKE_SUPPRESS_DEVELOPER_WARNINGS)
     set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS 1 CACHE INTERNAL "No dev warnings")
 endif()
 
+if (NOT WIN32)
+    include(GNUInstallDirs)
+endif()
+
+if (NOT DEFINED CMAKE_INSTALL_DATADIR)
+    if (WIN32)
+        set(CMAKE_INSTALL_DATADIR "${CMAKE_INSTALL_PREFIX}")
+    else()
+        set(CMAKE_INSTALL_DATADIR "${CMAKE_INSTALL_PREFIX}/share")
+    endif()
+endif()
+
+set(NEXTPNR_DATA_DIR "${CMAKE_INSTALL_DATADIR}/nextpnr")
+
 # We want to explictly include all include directories when generating the
 # compilation database as not all clang/gcc share the same implicit includes
 # leading to essentially non-working compile_commands.json
