@@ -95,7 +95,7 @@ namespace python {
 		py::exec(code, scope);
 	}
 
-	void initialize_arch_api(py::module_& module, py::class_<Context>& ctx);
+	void initialize_arch_api(py::module_& module, py::list& all, py::class_<Context>& ctx);
 
 	void dump_traceback(const py::error_already_set& exception) {
 		const auto type{exception.type()};
@@ -160,8 +160,9 @@ PYBIND11_EMBEDDED_MODULE(nextpnr, m) {
 	m.attr("ARCH") = STRINGIFY(ARCHNAME);
 
 	/* ==== nextpnr types ==== */
+	/* `nextpnr.types` */
 	auto m_types{m.def_submodule("types", "Core nextpnr types")};
-
+	/* `nextpnr.types.__all__` */
 	auto m_types_all{py::list()};
 
 	/* `nextpnr.types.GraphicElement` */
@@ -546,17 +547,28 @@ PYBIND11_EMBEDDED_MODULE(nextpnr, m) {
 	id_string.doc() = "";
 	m_types_all.append("IdString");
 
-	auto context{py::class_<Context>(m_types, "Context")};
-	m_types_all.append("Context");
+	/* ==== <ARCH> submodule ==== */
+	/* `nextpnr.<ARCH>` */
+	auto m_arch = m.def_submodule(STRINGIFY(ARCHNAME), "Python API for " STRINGIFY(ARCHNAME));
+	/* `nextpnr.<ARCH>.__all__` */
+	auto m_arch_all{py::list()};
 
+	/* `nextpnr.<ARCH>.Context` */
+	auto context{py::class_<Context>(m_arch, "Context")};
+	m_arch_all.append("Context");
+
+	python::initialize_arch_api(m_arch, m_arch_all, context);
+
+	m_arch.attr("__all__") = m_arch_all;
+
+	// NOTE(aki): This needs to be added to `nextpnr.types` *after* context due to ordering
+
+	/* `nextpnr.types.BaseCtx` */
 	auto base_ctx{py::class_<BaseCtx>(m_types, "BaseCtx")};
+	base_ctx.doc() = "";
 	m_types_all.append("BaseCtx");
 
 	m_types.attr("__all__") = m_types_all;
-
-	/* ==== <ARCH> submodule ==== */
-	auto m_arch = m.def_submodule(STRINGIFY(ARCHNAME), "Python API for " STRINGIFY(ARCHNAME));
-	python::initialize_arch_api(m_arch, context);
 }
 
 NEXTPNR_NAMESPACE_END

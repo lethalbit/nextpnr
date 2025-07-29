@@ -26,7 +26,7 @@ NEXTPNR_NAMESPACE_BEGIN
 namespace python {
 	namespace py = pybind11;
 
-	void initialize_arch_api(py::module_& module, py::class_<Context>& context) {
+	void initialize_arch_api(py::module_& module, py::list& all, py::class_<Context>& context) {
 
 	}
 }
